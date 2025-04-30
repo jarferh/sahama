@@ -14,10 +14,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Visual Studio build tools
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Install WebView2 SDK
+        run: |
+          Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "MicrosoftEdgeWebview2Setup.exe"
+          Start-Process -FilePath "MicrosoftEdgeWebview2Setup.exe" -Args "/silent /install" -Wait
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 'stable'
+          cache: true
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
@@ -26,7 +35,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Windows release
-        run: flutter build windows
+        run: flutter build windows --release
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v3
