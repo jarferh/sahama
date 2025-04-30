@@ -3,42 +3,48 @@ name: Build Windows App
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build Flutter Windows App
-    runs-on: windows-latest
-
+    runs-runs-on: windows-latest
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Visual Studio build tools
-        uses: microsoft/setup-msbuild@v1.1
+        uses: microsoft/setup-msbuild@v1.3.1
 
       - name: Install WebView2 SDK
         run: |
           Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "MicrosoftEdgeWebview2Setup.exe"
           Start-Process -FilePath "MicrosoftEdgeWebview2Setup.exe" -Args "/silent /install" -Wait
+          if (-not $?) { throw "Failed to install WebView2" }
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.12.0
         with:
           flutter-version: 'stable'
           cache: true
-
+          
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
 
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
+          if (-not $?) { throw "Flutter pub get failed" }
 
       - name: Build Windows release
-        run: flutter build windows --release
+        run: |
+          flutter build windows --release
+          if (-not $?) { throw "Build failed" }
 
       - name: Upload Windows Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Windows-App
           path: build/windows/runner/Release/
+          retention-days: 7
