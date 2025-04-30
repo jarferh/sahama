@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build Flutter Windows App
-    runs-runs-on: windows-latest
+    runs-on: windows-latest
     
     steps:
       - name: Checkout code
